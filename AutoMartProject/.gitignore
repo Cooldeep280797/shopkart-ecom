@@ -1,0 +1,44 @@
+# Ignore system folders
+AppData/
+Contacts/
+Desktop/
+Documents/
+Downloads/
+Favorites/
+Links/
+Music/
+Pictures/
+Saved Games/
+Searches/
+Videos/
+
+# Ignore IDE/workspace folders
+.android/
+.eclipse/
+.katalon/
+.lemminx/
+.vscode/
+
+# Ignore other configs and caches
+.cache/
+.config/
+.m2/
+.p2/
+.robotframework-ls/
+.lesshst
+.gitconfig
+NTUSER.DAT*
+
+# Additional IDE and project folders
+.zenmap/
+eclipse/
+Katalon Studio/
+Oracle/
+OneDrive/
+IntelGraphicsProfiles/
+
+# Ignore SQL files if you don't want them tracked
+*.sql
+
+# Ignore system files
+ntuser.ini
