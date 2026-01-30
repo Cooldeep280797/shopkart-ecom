@@ -47,4 +47,8 @@ public class TestBase {
 		}
 		
 	}
+	
+	public WebDriver getDriver() {
+		return driver;
+	}
 }

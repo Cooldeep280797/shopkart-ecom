@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<suite name="Suite">
+
+	<listeners>
+		<listener class-name="utils.ListenerClass"></listener>
+	</listeners>
+	
+
+	<test thread-count="5" name="Test">
+		<classes>
+			<class name="testCase.TestCase_mobileProductPageValidation" />
+			<class name="testCase.TestCase_FashionProductValidation" />
+			<class name="testCase.TestCase_RegisterPageValidation" />
+			<class name="testCase.TestCase_homePageValidation" />
+			<class name="testCase.TestCase_LoginPageValidation" />
+			<class name="testCase.TestCase_cartCheckoutValidation" />
+			<class name="testCase.TestCase_electronicsProductValidation" />
+			<class name="base.TestBase" />
+			<class name="testCase.TestCase_HomeProductValidation" />
+		</classes>
+	</test> <!-- Test -->
+</suite> <!-- Suite -->
