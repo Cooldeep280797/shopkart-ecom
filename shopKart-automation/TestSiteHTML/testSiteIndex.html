@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ShopKart | Categorized Dummy Ecommerce</title>
+
+<style>
+body{margin:0;font-family:Arial;background:#f1f3f6}
+header{background:#2874f0;color:#fff;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:24px;font-weight:bold}
+#search{width:40%;padding:8px;border:none}
+.actions button{margin-left:10px;padding:6px 10px;cursor:pointer}
+nav{background:#fff;padding:10px 20px}
+nav a{margin-right:20px;text-decoration:none;color:#333;font-weight:bold;cursor:pointer}
+nav a.active{color:#2874f0}
+main{padding:20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+
+.product{background:#fff;padding:15px;border-radius:5px;text-align:center}
+.product img{width:100%;height:150px;object-fit:cover;border-radius:5px}
+.product button{margin-top:10px;width:100%;padding:8px;background:#ff9f00;border:none;cursor:pointer}
+
+/* MODALS */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000}
+.modal-content{background:#fff;width:400px;padding:20px;margin:60px auto;position:relative;border-radius:6px}
+.close{position:absolute;top:8px;right:10px;cursor:pointer;font-weight:bold}
+.modal-content input,.modal-content select{width:100%;padding:8px;margin-bottom:10px}
+
+/* LOGIN */
+.login-box h3{text-align:center;color:#2874f0}
+.login-box button{width:100%;padding:10px;background:#2874f0;color:#fff;border:none;border-radius:4px}
+.login-extra{display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px}
+.login-extra a{cursor:pointer;color:#2874f0}
+
+/* REGISTER */
+.register-box h3{text-align:center;color:#2874f0}
+.register-box input,
+.register-box select{
+  width:92%;
+  padding:7px;
+  font-size:13px;
+  margin:6px auto;
+  display:block;
+  box-sizing:border-box;
+}
+.register-box button{
+  width:92%;
+  margin:10px auto 0;
+  display:block;
+  padding:9px;
+  background:#2874f0;
+  color:#fff;
+  border:none;
+  border-radius:4px;
+}
+
+/* DOB calendar fix */
+.dob-wrapper{
+  position:relative;
+  width:92%;
+  margin:6px auto;
+}
+
+#regDob{
+  width:100%;
+  padding-right:40px;
+}
+
+/* Invisible date picker overlay */
+#realDobPicker{
+  position:absolute;
+  top:0;
+  right:0;
+  width:40px;
+  height:100%;
+  opacity:0;
+  cursor:pointer;
+}
+#regDob{
+  width:100%;
+  padding-right:30px;
+}
+#dobCalendarIcon{
+  position:absolute;
+  right:8px;
+  top:50%;
+  transform:translateY(-50%);
+  cursor:pointer;
+}
+
+/* CART */
+.cart-item{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.cart-item img{width:50px;height:50px;object-fit:cover}
+#total{font-weight:bold}
+.checkout-btn{background:#4CAF50;color:#fff;padding:8px;border:none;width:100%}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">ShopKart</div>
+  <input id="search" placeholder="Search products" onkeyup="searchProducts()">
+
+  <div class="actions">
+    <span id="userLabel"></span>
+    <button id="loginBtn" onclick="openLogin()">Login</button>
+    <button id="registerBtn" onclick="openRegister()">Register</button>
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+    <button onclick="openCart()">🛒 Cart (<span id="cart-count">0</span>)</button>
+  </div>
+</header>
+
+<nav>
+  <a class="tab-link active" onclick="filterCategory('Mobiles',this)">Mobiles</a>
+  <a class="tab-link" onclick="filterCategory('Electronics',this)">Electronics</a>
+  <a class="tab-link" onclick="filterCategory('Fashion',this)">Fashion</a>
+  <a class="tab-link" onclick="filterCategory('Home',this)">Home</a>
+</nav>
+
+<main id="products"></main>
+
+<!-- LOGIN -->
+<div id="loginModal" class="modal">
+  <div class="modal-content login-box">
+    <span class="close" onclick="closeModal('loginModal')">✖</span>
+    <h3>Welcome Back 👋</h3>
+    <input id="loginPhone" placeholder="Phone Number" maxlength="10">
+    <input id="loginPass" type="password" placeholder="Password">
+    <div class="login-extra">
+      <span>🔒 Secure Login</span>
+      <a onclick="closeModal('loginModal');openRegister()">New user?</a>
+    </div>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div id="registerModal" class="modal">
+  <div class="modal-content register-box">
+    <span class="close" onclick="closeModal('registerModal')">✖</span>
+    <h3>Create Account</h3>
+
+    <input id="regPhone" placeholder="Phone Number" maxlength="10">
+    <input id="regEmail" type="email" placeholder="Email">
+    <input id="regPass" type="password" placeholder="Password">
+
+    <select id="regGender">
+      <option value="">Select Gender</option>
+      <option>Male</option>
+      <option>Female</option>
+      <option>Other</option>
+    </select>
+
+    <!-- ✅ FIXED DOB (ONLY CHANGE HERE) -->
+  <div class="dob-wrapper">
+  <!-- Visible formatted DOB -->
+  <input
+    id="regDob"
+    type="text"
+    placeholder="DD/MM/YYYY"
+    maxlength="10"
+    oninput="formatDOB(this)"
+  >
+	
+	<span id="dobCalendarIcon" onclick="openCalendar()">📅</span>
+  <!-- REAL date picker (invisible, positioned on top) -->
+  <input
+    type="date"
+    id="realDobPicker"
+    onchange="syncDob(this.value)"
+  >
+</div>
+
+
+
+    <button onclick="register()">Register</button>
+  </div>
+</div>
+
+<!-- CART -->
+<div id="cartModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('cartModal')">✖</span>
+    <h3>Your Cart</h3>
+    <div id="cartItems"></div>
+    <p id="total">Total: ₹0</p>
+    <button class="checkout-btn">Checkout</button>
+  </div>
+</div>
+
+<script>
+const products=[
+{id:1,name:"iPhone 14",price:79999,img:"https://rukminim2.flixcart.com/image/416/416/xif0q/mobile/3/5/l/-original-imaghx9qmgqsk9s4.jpeg?q=70&crop=false",category:"Mobiles"},
+{id:2,name:"Samsung Galaxy S23",price:69999,img:"https://ss7.vzw.com/is/image/VerizonWireless/samsung-diamond1-cream?wid=400&hei=400",category:"Mobiles"},
+{id:3,name:"HP Laptop",price:55999,img:"https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400",category:"Electronics"},
+{id:4,name:"Smart Watch",price:2999,img:"https://static.vecteezy.com/system/resources/thumbnails/036/782/085/small/ai-generated-innovative-smart-watch-mockup-for-tech-marketing-ai-generated-photo.jpg",category:"Electronics"},
+{id:5,name:"T-Shirt",price:799,img:"https://images.unsplash.com/photo-1523381294911-8d3cead13475?auto=format&fit=crop&w=400",category:"Fashion"},
+{id:6,name:"Sneakers",price:2999,img:"https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&h=300",category:"Fashion"},
+{id:7,name:"Coffee Maker",price:2499,img:"https://static.vecteezy.com/system/resources/previews/030/492/811/large_2x/coffee-maker-and-two-cups-of-coffee-on-a-white-table-ai-generated-free-photo.jpg",category:"Home"},
+{id:8,name:"Vacuum Cleaner",price:5499,img:"https://img.freepik.com/free-photo/white-handheld-vacuum-cleaner-leaning-against-wall_53876-128137.jpg",category:"Home"}
+];
+
+let users=JSON.parse(localStorage.getItem("users"))||[];
+let currentUser=localStorage.getItem("currentUser");
+let cart=JSON.parse(localStorage.getItem("cart_"+currentUser))||[];
+let currentCategory="Mobiles";
+
+const productsDiv=document.getElementById("products");
+
+function renderProducts(list){
+  productsDiv.innerHTML="";
+  list.forEach(p=>{
+    productsDiv.innerHTML+=`
+      <div class="product">
+        <img src="${p.img}">
+        <h4>${p.name}</h4>
+        <p>₹${p.price}</p>
+        <button onclick="addToCart(${p.id})">Add to Cart</button>
+      </div>`;
+  });
+}
+
+function filterCategory(cat,el){
+  currentCategory=cat;
+  document.querySelectorAll('.tab-link').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  renderProducts(products.filter(p=>p.category===cat));
+}
+
+function openLogin(){loginModal.style.display="block"}
+function openRegister(){registerModal.style.display="block"}
+function openCart(){updateCartModal();cartModal.style.display="block"}
+function closeModal(id){document.getElementById(id).style.display="none"}
+
+function register(){
+  if(!regPhone.value||!regEmail.value||!regPass.value||!regGender.value||!regDob.value)
+    return alert("Fill all fields");
+
+  if(!/^\d{10}$/.test(regPhone.value))
+    return alert("Phone number must be exactly 10 digits");
+
+  if(regPass.value.length < 8)
+    return alert("Password must be at least 8 characters");
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(regEmail.value))
+    return alert("Enter a valid email address");
+
+  if(users.find(u=>u.phone===regPhone.value))
+    return alert("Phone already registered");
+
+  users.push({
+    phone:regPhone.value,
+    email:regEmail.value,
+    pass:regPass.value,
+    gender:regGender.value,
+    dob:regDob.value
+  });
+
+  localStorage.setItem("users",JSON.stringify(users));
+  alert("Registration successful");
+  closeModal("registerModal");
+}
+
+function login(){
+  const u=users.find(x=>x.phone===loginPhone.value && x.pass===loginPass.value);
+  if(!u)return alert("Invalid credentials");
+  currentUser=loginPhone.value;
+  localStorage.setItem("currentUser",currentUser);
+  cart=JSON.parse(localStorage.getItem("cart_"+currentUser))||[];
+  updateUI();
+  closeModal("loginModal");
+}
+
+function logout(){
+  localStorage.removeItem("currentUser");
+  currentUser=null;
+  cart=[];
+  updateUI();
+}
+
+function addToCart(id){
+  if(!currentUser)return alert("Login first");
+  cart.push(id);
+  localStorage.setItem("cart_"+currentUser,JSON.stringify(cart));
+  updateCart();
+}
+
+function updateCart(){
+  document.getElementById("cart-count").innerText=cart.length;
+}
+
+function updateCartModal(){
+  cartItems.innerHTML="";
+  let sum=0;
+  cart.forEach(id=>{
+    const p=products.find(x=>x.id===id);
+    sum+=p.price;
+    cartItems.innerHTML+=`<div class="cart-item">${p.name} - ₹${p.price}</div>`;
+  });
+  total.innerText="Total: ₹"+sum;
+  updateCart();
+}
+
+function updateUI(){
+  if(currentUser){
+    userLabel.innerText=`Hi, ${currentUser}`;
+    loginBtn.style.display="none";
+    registerBtn.style.display="none";
+    logoutBtn.style.display="inline-block";
+  }else{
+    userLabel.innerText="";
+    loginBtn.style.display="inline-block";
+    registerBtn.style.display="inline-block";
+    logoutBtn.style.display="none";
+  }
+  updateCart();
+}
+
+function formatDOB(input){
+  let v = input.value.replace(/\D/g,"").slice(0,8);
+  if(v.length >= 4)
+    input.value = v.slice(0,2)+"/"+v.slice(2,4)+"/"+v.slice(4);
+  else if(v.length >= 2)
+    input.value = v.slice(0,2)+"/"+v.slice(2);
+  else
+    input.value = v;
+}
+
+function syncDob(value){
+  if(!value) return;
+  const [y,m,d] = value.split("-");
+  regDob.value = `${d}/${m}/${y}`;
+}
+
+function openCalendar(){
+  const picker = document.getElementById("hiddenDobPicker");
+
+  picker.onchange = function(){
+    if(this.value){
+      const [y,m,d] = this.value.split("-");
+      regDob.value = `${d}/${m}/${y}`;
+    }
+  };
+
+  picker.showPicker(); // ✅ modern & supported
+}
+
+function searchProducts(){
+  const keyword = document.getElementById("search").value.toLowerCase();
+
+  const filtered = products.filter(p =>
+    p.category === currentCategory &&
+    p.name.toLowerCase().includes(keyword)
+  );
+
+  renderProducts(filtered);
+}
+
+function openNativeCalendar(){
+  const d=document.createElement("input");
+  d.type="date";
+  d.onchange=function(){
+    const [y,m,da]=this.value.split("-");
+    regDob.value=`${da}/${m}/${y}`;
+  };
+  d.click();
+}
+
+filterCategory("Mobiles",document.querySelector(".tab-link.active"));
+updateUI();
+</script>
+
+</body>
+</html>
